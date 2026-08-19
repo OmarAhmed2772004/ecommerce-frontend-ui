@@ -2,9 +2,18 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 
+// 🟢 تعريف نوع بيانات المنتج لتوافق TypeScript
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category?: string;
+}
+
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -23,8 +32,7 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // 🟢 تعريف دالة إضافة المنتجات للسلة
-  const addToCart = (product) => {
+  const addToCart = (product: Product) => {
     setCart((prev) => [...prev, product]);
   };
 
@@ -32,7 +40,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* Navbar */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -58,7 +65,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Banner */}
       <section className="bg-gradient-to-b from-indigo-900 to-slate-900 text-white py-20 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <span className="bg-indigo-500/20 text-indigo-300 text-sm font-semibold px-4 py-1.5 rounded-full border border-indigo-500/30">
@@ -73,7 +79,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Products */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
           <span>المنتجات المتاحة</span>
@@ -95,7 +100,6 @@ export default function Home() {
         )}
       </main>
 
-      {/* Cart Drawer */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md h-full p-6 shadow-2xl flex flex-col justify-between">
