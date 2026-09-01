@@ -16,9 +16,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
-  title: "Omar Store | Tech E-Commerce",
-  description: "Modern Full-Stack E-Commerce Platform built with Next.js & Express",
+  title: {
+    default: "Omar Store | متجر إلكتروني متكامل",
+    template: "%s | Omar Store",
+  },
+  description: "تسوق أحدث الأجهزة الإلكترونية واللابتوبات بأفضل الأسعار مع توصيل سريع وضمان أصلي.",
+  keywords: ["متجر إلكتروني", "إلكترونيات", "لابتوبات", "تسوق أونلاين", "Omar Store"],
+  openGraph: {
+    title: "Omar Store | متجر إلكتروني متكامل",
+    description: "تسوق أحدث الأجهزة الإلكترونية بأفضل الأسعار",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProductCard from '../components/ProductCard';
 import { useAuth } from '@/context/AuthContext';
@@ -11,17 +11,20 @@ interface Product {
   description: string;
   price: number;
   category?: string;
+  stock: number;
 }
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { cart, addToCart, totalPrice, totalItems } = useCart();
+  const { cart, totalPrice, totalItems } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('الكل');
+  const [sortBy, setSortBy] = useState('newest');
 
-  // 🔒 لو المستخدم مش مسجل دخول، حوّله لصفحة الدخول
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -43,7 +46,31 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // ⏳ لسه بيتحقق من تسجيل الدخول أو مفيش مستخدم (هيتحول لـ /login)
+  const categories = useMemo(() => {
+    const unique = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
+    return ['الكل', ...unique];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    if (search.trim()) {
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(search.trim().toLowerCase())
+      );
+    }
+
+    if (activeCategory !== 'الكل') {
+      result = result.filter((p) => p.category === activeCategory);
+    }
+
+    if (sortBy === 'price_asc') result.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price_desc') result.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
+
+    return result;
+  }, [products, search, activeCategory, sortBy]);
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -83,10 +110,48 @@ export default function Home() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* شريط البحث والفلترة */}
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-4 mb-8 flex flex-col md:flex-row gap-4">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="🔍 ابحث عن منتج..."
+            className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 outline-none transition"
+          />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-indigo-400 outline-none transition md:w-56"
+          >
+            <option value="newest" className="bg-slate-900">الأحدث</option>
+            <option value="price_asc" className="bg-slate-900">السعر: من الأقل للأعلى</option>
+            <option value="price_desc" className="bg-slate-900">السعر: من الأعلى للأقل</option>
+            <option value="name" className="bg-slate-900">الاسم أبجديًا</option>
+          </select>
+        </div>
+
+        {/* فئات المنتجات */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat!)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
+                activeCategory === cat
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg shadow-indigo-900/40'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
           <span>المنتجات المتاحة</span>
           <span className="text-xs bg-white/10 text-slate-200 px-2.5 py-0.5 rounded-full">
-            {products.length}
+            {filteredProducts.length}
           </span>
         </h2>
 
@@ -94,13 +159,15 @@ export default function Home() {
           <div className="flex justify-center py-20">
             <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
-            <p className="text-slate-400 text-lg">لا توجد منتجات متاحة حاليًا.</p>
+            <p className="text-slate-400 text-lg">
+              {products.length === 0 ? 'لا توجد منتجات متاحة حاليًا.' : 'مفيش نتائج مطابقة لبحثك.'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <ProductCard key={p._id} product={p} />
             ))}
           </div>
