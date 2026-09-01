@@ -1,10 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api';
-import { useEffect } from 'react';
 
 const CATEGORIES = ['Electronics', 'Cameras', 'Laptops', 'Accessories', 'Headphones'];
 
@@ -17,6 +16,7 @@ export default function NewProductPage() {
     price: '',
     category: CATEGORIES[0],
     stock: '',
+    image: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -145,6 +145,23 @@ export default function NewProductPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-200 mb-1.5">
+              رابط صورة المنتج (اختياري)
+            </label>
+            <input
+              name="image"
+              type="url"
+              value={form.image}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 outline-none transition"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              تقدر تستخدم أي رابط صورة مباشر (من Unsplash أو Imgur مثلاً)
+            </p>
           </div>
 
           <button

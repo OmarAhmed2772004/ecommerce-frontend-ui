@@ -36,6 +36,14 @@ export default function Navbar() {
               >
                 طلباتي
               </Link>
+
+                            <Link
+                href="/wishlist"
+                className="text-sm font-semibold text-slate-200 hover:text-white px-3 py-2"
+              >
+                المفضلة ❤️
+              </Link>
+              
               {user.role === 'admin' && (
                 <>
                   <Link

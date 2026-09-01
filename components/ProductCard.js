@@ -2,13 +2,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProductCard({ product }) {
   const { addToCart, getQtyInCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const { user } = useAuth();
   const [isAdded, setIsAdded] = useState(false);
 
   const qtyInCart = getQtyInCart(product._id);
   const isMaxed = qtyInCart >= product.stock;
+  const wishlisted = isWishlisted(product._id);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -20,6 +25,13 @@ export default function ProductCard({ product }) {
     }
   };
 
+  const handleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) return;
+    toggleWishlist(product._id);
+  };
+
   return (
     <Link
       href={`/products/${product._id}`}
@@ -29,9 +41,29 @@ export default function ProductCard({ product }) {
         <span className="absolute top-3 left-3 bg-white/10 backdrop-blur-md text-white text-xs font-medium px-3 py-1 rounded-full border border-white/20">
           {product.category || 'تكنولوجيا'}
         </span>
-        <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
-          💻
-        </div>
+
+        {user && (
+          <button
+            onClick={handleWishlist}
+            className="absolute top-3 right-3 w-9 h-9 bg-black/30 backdrop-blur-md rounded-full flex items-center justify-center hover:scale-110 transition-transform z-10"
+          >
+            <span className={wishlisted ? 'text-red-500' : 'text-white/70'}>
+              {wishlisted ? '❤️' : '🤍'}
+            </span>
+          </button>
+        )}
+
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+        ) : (
+          <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
+            💻
+          </div>
+        )}
       </div>
 
       <div className="p-6 flex-1 flex flex-col justify-between">
@@ -42,6 +74,11 @@ export default function ProductCard({ product }) {
           <p className="text-slate-400 text-sm mt-2 leading-relaxed line-clamp-2">
             {product.description}
           </p>
+          {product.numReviews > 0 && (
+            <div className="flex items-center gap-1 mt-2 text-amber-400 text-xs">
+              ★ {product.rating.toFixed(1)} <span className="text-slate-500">({product.numReviews})</span>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">

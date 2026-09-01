@@ -17,6 +17,7 @@ export default function EditProductPage() {
     price: '',
     category: CATEGORIES[0],
     stock: '',
+    image: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ export default function EditProductPage() {
             price: String(data.data.price),
             category: data.data.category,
             stock: String(data.data.stock),
+            image: data.data.image || '',
           });
         }
       } catch {
@@ -165,6 +167,23 @@ export default function EditProductPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-200 mb-1.5">
+              رابط صورة المنتج (اختياري)
+            </label>
+            <input
+              name="image"
+              type="url"
+              value={form.image}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 outline-none transition"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              تقدر تستخدم أي رابط صورة مباشر (من Unsplash أو Imgur مثلاً)
+            </p>
           </div>
 
           <button
